@@ -1,1 +1,2 @@
-"hello this is a string" 'this is a string' 5 :symbol identifier
+5 + 4 + 7 + (8 + 9)
+

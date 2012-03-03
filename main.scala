@@ -8,6 +8,6 @@ object TestEnv {
          fromFile(args(1)).mkString 
        else 
          fromFile("test.twk").mkString
-     println(TweakParser.parseAll(TweakParser.test, contents))
+     println(TweakParser.parseAll(TweakParser.all, contents))
   }
 }
