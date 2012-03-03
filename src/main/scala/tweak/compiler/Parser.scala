@@ -3,7 +3,7 @@ package tweak.compiler
 import scala.util.parsing.combinator._
 
 object TweakParser extends JavaTokenParsers {
-    def all: Parser[Any] = rep(expression)
+    def all: Parser[Any] = rep(expression | block)
     
     /* Block Production */
     def block: Parser[Any] = "{"~rep(expression)~"}"
@@ -17,16 +17,18 @@ object TweakParser extends JavaTokenParsers {
     
     /* Value Production */
     def value: Parser[Any] = (
-      integer 
+      boolean
+    | integer 
     | double 
-    | symbol 
     | singleQuoteString 
     | doubleQuoteString
+    | function
+    | symbol 
     | identifier  
     | list
-    | function
     )
     
+    /* work on nested operations */
     def complexOperation: Parser[Any] = opt("(")~(complexPrefixOperation | complexInfixOperation)~opt(")")
     
     def complexPrefixOperation: Parser[Any] = wrappedOperator~repsep(operation | value, ",")
@@ -65,9 +67,10 @@ object TweakParser extends JavaTokenParsers {
     def symbol: Parser[String] = """:.*""".r
     def integer: Parser[Any] = wholeNumber
     def double: Parser[Any] = floatingPointNumber
+    def boolean: Parser[Any] = "true" ^^ (x => true) | "false" ^^ (x => false)
     def nonEqualOp: Parser[Any] = """[<>?:!@#$%\^&\*\-+]+""".r
     def equalOp: Parser[Any] = """=*[=<>?:!@#$%\^&\*\-+]+""".r
-    def assignmentOp: Parser[Any] = "="
+    def assignmentOp: Parser[Any] = "=" ^^ 
     def mutableRef: Parser[Any] = "var"
     def immutableRef: Parser[Any] = "val"
 }
