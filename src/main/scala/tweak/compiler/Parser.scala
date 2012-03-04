@@ -1,8 +1,9 @@
 package tweak.compiler 
 
 import scala.util.parsing.combinator._
+import tweak.compiler.ast._
 
-object TweakParser extends JavaTokenParsers {
+object TParser extends JavaTokenParsers {
     def all: Parser[Any] = rep(expression | block)
     
     /* Block Production */
@@ -27,7 +28,8 @@ object TweakParser extends JavaTokenParsers {
     | identifier  
     | list
     )
-    
+    /* If Statement Production */
+    //def ifStatement: Parser[Any] = "if"~condition~"then"~expression~opt("else"~expression~)~"end"
     /* work on nested operations */
     def complexOperation: Parser[Any] = opt("(")~(complexPrefixOperation | complexInfixOperation)~opt(")")
     
@@ -51,8 +53,8 @@ object TweakParser extends JavaTokenParsers {
     | (identifier | function)~"apply"~repsep(value,","))
     
     /* List Productions */
-    def list: Parser[Any] = "["~repsep(value, ",")~"]"
-    def argumentList: Parser[Any] = "["~repsep(identifier, ",")~"]"
+    def list: Parser[Any] = "["~>repsep(value, ",")<~"]" ^^ (x => new ListNode(x))
+    def argumentList: Parser[Any] = "["~>repsep(identifier, ",")<~"]" ^^ (x => new ArgListNode(x))
     
     /* Operator Productions */
     def prefixOperation: Parser[Any] = "("~operator~")"~repsep(value, ",")
@@ -61,6 +63,7 @@ object TweakParser extends JavaTokenParsers {
     def operator: Parser[Any] = nonEqualOp | equalOp
     
     /* Terminals */
+    //def comment: Parser[String] = """--.*""".r ^^(x => Nothing)
     def identifier: Parser[String] = """[a-zA-Z_]\w*""".r 
     def doubleQuoteString: Parser[String] = """(\".*\")""".r
     def singleQuoteString: Parser[String] = "\'.*\'".r
@@ -70,7 +73,7 @@ object TweakParser extends JavaTokenParsers {
     def boolean: Parser[Any] = "true" ^^ (x => true) | "false" ^^ (x => false)
     def nonEqualOp: Parser[Any] = """[<>?:!@#$%\^&\*\-+]+""".r
     def equalOp: Parser[Any] = """=*[=<>?:!@#$%\^&\*\-+]+""".r
-    def assignmentOp: Parser[Any] = "=" ^^ 
+    def assignmentOp: Parser[Any] = "="
     def mutableRef: Parser[Any] = "var"
     def immutableRef: Parser[Any] = "val"
 }

@@ -1,4 +1,4 @@
-import tweak.compiler.TweakParser 
+import tweak.compiler.TParser 
 import scala.io.Source._
 
 object TestEnv {
@@ -8,6 +8,6 @@ object TestEnv {
          fromFile(args(1)).mkString 
        else 
          fromFile("test.twk").mkString
-     println(TweakParser.parseAll(TweakParser.all, contents))
+     println(TParser.parseAll(TParser.all, contents))
   }
 }
