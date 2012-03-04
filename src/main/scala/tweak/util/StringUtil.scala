@@ -10,4 +10,6 @@ object StringUtil {
     else 
       return items.head.toString + sep + join(items.tail, sep)
   }
+  
+  def stripQuotes(string: String) = string.substring(1, string.length - 1)
 }
