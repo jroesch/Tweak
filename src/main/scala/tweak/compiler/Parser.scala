@@ -2,10 +2,10 @@ package tweak.compiler
 
 import scala.util.parsing.combinator._
 import tweak.compiler.ast._
-import tweak.util.StringUtil.{ stripQuotes => stripQ }
+import tweak.util.ParseUtil._
 
 object TParser extends JavaTokenParsers {
-    def interprete(s: String) = parseAll(all, s)
+    def interpret(s: String) = parseAll(all, s)
     
     def all: Parser[Any] = rep(expression | block)
     
@@ -14,7 +14,7 @@ object TParser extends JavaTokenParsers {
     
     /* Expression Productions */
     def expression: Parser[Any] = (
-      assignmentExpression ^^ (x => buildAssignmentNode(x))
+      assignmentExpression //^^ (x => buildAssignmentNode(x))
     | operation 
     | value 
     )
@@ -26,8 +26,8 @@ object TParser extends JavaTokenParsers {
     /* Value Production */
     def value: Parser[Any] = (
       boolean
-    | integer 
     | double 
+    | integer 
     | singleQuoteString 
     | doubleQuoteString
     | function
@@ -48,7 +48,7 @@ object TParser extends JavaTokenParsers {
       opt("(")~>(identifier | function)~"apply"~repsep(value,",")<~opt(")"))  
     
     /* List Productions */
-    def list: Parser[Any] = "["~>repsep(value, ",")<~"]" ^^ (x => new ListNode(x))
+    def list: Parser[Any] = "["~>repsep(value, ",")<~"]" //^^ (x => new ListNode(x))
     def argumentList: Parser[Any] = "["~>repsep(identifier, ",")<~"]" ^^ (x => new ArgListNode(x))
     
     
@@ -60,13 +60,13 @@ object TParser extends JavaTokenParsers {
     
     /* Terminals */
     //def comment: Parser[Any] = """--.*""".r ^^(x => None)
-    def identifier: Parser[Any] = """[a-zA-Z_]\w*""".r 
-    def doubleQuoteString: Parser[Any] = """(\".*\")""".r ^^ (x => new ValueNode(stripQ(x)))
-    def singleQuoteString: Parser[Any] = "\'.*\'".r ^^ (x => new ValueNode(stripQ(x)))
-    def symbol: Parser[Any] = """:.*""".r ^^ (x => new ValueNode(Symbol(x)))
-    def integer: Parser[Any] = wholeNumber ^^ (x => new ValueNode(x.toInt))
-    def double: Parser[Any] = floatingPointNumber ^^ (x => new ValueNode(x.toDouble))
-    def boolean: Parser[Any] = "true" ^^ (x => true) | "false" ^^ (x => false)
+    def identifier: Parser[Any] = """[a-zA-Z_]\w*""".r //resolve the identifer 
+    def doubleQuoteString: Parser[Any] = """(\".*\")""".r ^^ (x => newStringNode(x))
+    def singleQuoteString: Parser[Any] = "\'.*\'".r ^^ (x => newStringNode(x))
+    def symbol: Parser[Any] = """:.*""".r ^^ (x => newSymbolNode(x))
+    def integer: Parser[Any] = wholeNumber ^^ (x => newIntegerNode(x))
+    def double: Parser[Any] = """\d+\.\d+""".r ^^ (x => newDoubleNode(x))
+    def boolean: Parser[Any] = "true" ^^ (x => newBooleanNode(true)) | "false" ^^ (x => newBooleanNode(false))
     def assignmentOp: Parser[Any] = "="
     def additionOp: Parser[Any] = "+"
     def subtractionOp: Parser[Any] = "-"

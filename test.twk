@@ -1,3 +1,4 @@
--- This is a Comment
-(1 + 5) - (2 + 4)
-
+var a = 5
+var b = 5.000
+var c = 'Hello'
+var d = "Hello"
