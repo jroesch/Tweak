@@ -1,15 +1,24 @@
-import unfiltered.request._
-import unfiltered.response._
-import tweak.compiler.TParser 
+//import unfiltered.request._
+//import unfiltered.response._
+import tweak.compiler.TParser
+import scala.tools.jline.console.ConsoleReader
 import scala.io.Source._
+
 
 object Main {
   def main(args: Array[String]) {
-    unfiltered.jetty.Http.local(8080).filter(REPLServer).run()
-  }
+    //unfiltered.jetty.Http.local(8080).filter(REPLServer).run()
+    val reader = new ConsoleReader();
+    reader.setPrompt("> ")
+    var line = reader.readLine()
+    while (line != null) {
+      println(TParser.parseAll(TParser.all, line))
+      line = reader.readLine()
+    }
+  } 
 }
 
-object REPLServer extends unfiltered.filter.Plan {
+/* object REPLServer extends unfiltered.filter.Plan {
   def intent = {
     case req @ Path("/") => req match {
       case POST(_) => {
@@ -23,12 +32,4 @@ object REPLServer extends unfiltered.filter.Plan {
   def repl(s: String): String = {
     TParser.interpret(s).toString
   }
-}
-
-
-/* val contents = 
-  if (args.length > 1) 
-    fromFile(args(1)).mkString 
-  else 
-    fromFile("test.twk").mkString
-println(TParser.parseAll(TParser.all, contents)) */
+} */
