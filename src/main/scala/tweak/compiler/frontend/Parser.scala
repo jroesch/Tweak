@@ -39,7 +39,7 @@ object Parser extends RegexParsers {
     | "case" ~ exp ~ "of" ~ matcher ^^ null
     | "let" ~ decs ~ "in" ~ exp ~ "end" ^^ null
     | "(" ~ ")" ^^ { (_, _) => UnitL }
-    | "(" ~ exp ~ ")" ^^ { (_, e, _) => e }
+    | "(" ~ exp ~ ")" ^^ { (_, e, _) => ApplyStream(Vector(e)) }
     | "(" ~ commaExps ~ ")" ^^ null
   )
   
