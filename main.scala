@@ -1,4 +1,4 @@
-import tweak.compiler.frontend.{ TwkParser => TweakParser }
+import tweak.compiler.frontend.{ Parser => TweakParser }
 import com.codecommit.gll._
 import tweak.compiler.ast._
 import scala.tools.jline.console.ConsoleReader
