@@ -22,6 +22,23 @@ package object ast {
   /* Functions */
   case class TFunction(ms: Seq[Match]) extends Exp
   
+  object ApplyStream {
+    implicit def vectorToApplyStream(vec: Vector[Exp]) = ApplyStream(vec)
+    implicit def ApplyStreamToVector(opstr: ApplyStream): Vector[Exp] = opstr.ops
+    
+    def genStream(f: Exp, g: Exp): ApplyStream = 
+      (f, g) match {
+        case (ApplyStream(fst), ApplyStream(snd)) => fst ++ snd
+        case (ApplyStream(fst), snd)              => fst :+ snd
+        case (fst, ApplyStream(snd))              => fst +: snd
+        case (_, _)                               => Vector(f, g)
+      }
+  }
+  
+  case class ApplyStream(ops: Vector[Exp]) extends Exp {
+    override def toString = "ApplyStream(" + ops.mkString(", ") + ")"
+  }
+  
   case class Apply(a: Exp, b: Exp) extends Exp {
     override def pprint = a match {
       case Apply(Apply(op: Op, e1), e2) => 
@@ -53,6 +70,8 @@ package object ast {
   case class Symbol(s: String) extends Term
   case class Id(s: Symbol) extends Exp
   
+  case class Infix(s: Symbol, prec: Int)
+  
   /* Variable */
   case class Binding(pat: Pattern, typ: Type = AnyType, exp: Exp) extends Term
   
@@ -63,13 +82,28 @@ package object ast {
   /* Literals */
   sealed trait Literal extends Exp
   sealed trait Number extends Literal
-  case class IntL(i: Int) extends Number
-  case class DoubleL(d: Double) extends Number
-  case class StringL(s: String) extends Literal
-  case object UnitL extends Literal
+  
+  case class IntL(i: Int) extends Number {
+    override def toString = i.toString
+  }
+  
+  case class DoubleL(d: Double) extends Number {
+    override def toString = d.toString
+  }
+  
+  case class StringL(s: String) extends Literal {
+    override def toString = s.toString
+  }
+  
+  case object UnitL extends Literal {
+    override def toString = "()"
+  }
   
   /* Literal Implicits */
   implicit def intToIntL(i: Int): IntL = IntL(i)
   implicit def doubleToDoubleL(d: Double): DoubleL = DoubleL(d)
   implicit def stringToStringL(s: String): StringL = StringL(s)
+  implicit def intLToInt(i: IntL): Int = i.i
+  implicit def doubleLToDouble(d: DoubleL): Double = d.d
+  implicit def strLToString(s: StringL): String = s.s
 }
