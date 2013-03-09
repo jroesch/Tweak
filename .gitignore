@@ -40,3 +40,5 @@ lib_managed/
 src_managed/
 project/boot/
 src/.DS_Store
+*~
+*.swp
