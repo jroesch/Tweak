@@ -61,6 +61,32 @@ package object ast {
   
   case class ApplyStream(ops: Vector[Exp]) extends Exp {
     override def toString = "ApplyStream(" + ops.mkString(", ") + ")"
+
+     /* def fix(pt: frontend.internal.PrecedenceTable) = this match {
+      (pt.minLevel to pt.maxLevel) map { l => 
+        val atLevel = pt atLevel l
+        
+        type StreamState = (Exp, Exp, Vector[Exp])
+
+        var ttree = Vector[Exp]()
+
+        var i = 0;
+        while (i < ops.length) {
+          (ops(i), ops(i + 1), ops(i + 2)) match {
+            case (e1, o: Op, e2) if pt(o.op) == l => {
+              i += 3
+              tree = Apply(Apply(o, e1), e2) +: tree
+            }
+
+            case e => {
+              i += 1
+              tree = e +: tree
+            }
+          }
+        }
+
+      } */
+
   }
   
   case class Apply(a: Exp, b: Exp) extends Exp {
@@ -105,6 +131,12 @@ package object ast {
   
   /* Literals */
   sealed trait Value extends Exp
+
+  sealed trait TList extends Value
+  case class TCons(head: Exp, tail: Exp) extends Value
+  case class TListL extends Value with Literal
+  case object TNil extends Value with Literal
+
   /* Tuple Wraper */
   case class TTuple[A <: Exp](tup: Seq[A]) extends Exp {
     val size = tup.length
@@ -112,9 +144,10 @@ package object ast {
     if (size > 23) throw new Exception("Too big mannnn!")
   }
 
-  sealed trait Literal extends Value
+  sealed trait Literal extends Exp
+
   sealed trait Number extends Literal
-  
+
   case class IntL(i: Int) extends Number {
     override def toString = i.toString
   }
@@ -123,7 +156,7 @@ package object ast {
     override def toString = d.toString
   }
   
-  case class StringL(s: String) extends Literal {
+  case class StringL(s: String) extends Number {
     override def toString = s.toString
   }
   
