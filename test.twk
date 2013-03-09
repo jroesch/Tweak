@@ -1,2 +1,8 @@
 val fst = (x, _) => x
 val snd = (_, y) => y
+
+val foldL = (f, a, xs) =>
+    match xs with 
+      Nil => a
+    | y :: ys => fold f (f a y) ys
+
