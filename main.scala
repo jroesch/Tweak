@@ -11,7 +11,7 @@ object Main {
       val results = TweakParser.program(fromFile(args(0)).mkString)
       val forest = for (Success(tree, _) <- results) yield tree
       forest.head match {
-        case Program(xs) => xs.foreach(println(_))
+        case p@Program(xs) => println(p.pprint) //xs.foreach(println(_))
         case _ => println("failed")
       }
       
