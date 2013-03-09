@@ -40,10 +40,9 @@ object Parser extends RegexParsers {
     | op 
     | fun
     | exp ~ exp ^^ { (f, g) => ApplyStream.genStream(f, g) }
-    | "nil" ^^ null
-    | exp ~ "::" ~ exp ^^ null
-    | "case" ~ exp ~ "of" ~ matcher ^^ null
-    | "let" ~ decs ~ "in" ~ exp ~ "end" ^^ null
+    //| "nil" ^^ null
+    | "match" ~ exp ~ "with" ~ matcher ^^ { (_, sc, _, ms) => CaseExp(sc, ms) }
+    //| "let" ~ decs ~ "in" ~ exp ~ "end" ^^ null
     | "(" ~ ")" ^^ { (_, _) => UnitL }
     | "(" ~ exp ~ ")" ^^ { (_, e, _) => ApplyStream(Vector(e)) }
     | "(" ~> commaExps <~ ")" ^^ { TTuple(_) }
@@ -102,7 +101,7 @@ object Parser extends RegexParsers {
      """(\d+((E|e)(\+|\-)?\d+)(F|f|D|d)?)""").r
 
   
-  val operator: GLLParser[String] = """[=\+\*\-\?\\\$<>]+"""r
+  val operator: GLLParser[String] = """[=\+\*\-\?\\\$<>:]+"""r
   
   def mkErrorMsg(failed: Failure) = {
     val Failure(data, tail) = failed
