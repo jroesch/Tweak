@@ -8,7 +8,31 @@ package object ast {
     def pprint: String = this.toString
   }
   
-  sealed trait Term extends PrettyPrintable
+  object PrettyPrinter {
+    import com.codecommit.gll._
+    def prettyPrint[A <: PrettyPrintable](s: Stream[Result[A]]) = s match {
+      case Stream(s) => s match { 
+        case Success(v, rest) => v.pprint
+        case _                => throw new Exception("parse failed at:")
+      }
+      case _ => throw new Exception("match error")
+    }
+  }
+  
+  sealed trait Term extends PrettyPrintable { this: Term => 
+    override def pprint: String = {
+      
+      var ilevel = 0
+      
+      def ipprint(t: Term, indentLevel: Int = ilevel): String = t match {
+          case Program(es) => es.foldLeft("") { (a, s) => a + ipprint(s) + "\n" } 
+            // case
+          case _ => (t, indentLevel).toString
+      }
+
+      ipprint(this)
+    }
+  }
   
   /* Program */
   case class Program(es: Seq[Binding]) extends Term
@@ -80,7 +104,15 @@ package object ast {
   case object AnyType extends Type
   
   /* Literals */
-  sealed trait Literal extends Exp
+  sealed trait Value extends Exp
+  /* Tuple Wraper */
+  case class TTuple[A <: Exp](tup: Seq[A]) extends Exp {
+    val size = tup.length
+
+    if (size > 23) throw new Exception("Too big mannnn!")
+  }
+
+  sealed trait Literal extends Value
   sealed trait Number extends Literal
   
   case class IntL(i: Int) extends Number {
