@@ -8,16 +8,22 @@ import language.postfixOps
 
 object Parser extends RegexParsers { 
   type GLLParser[T] = Parser[T]
+  
+  /* implicit class UnwrapResult[A <: Term](val r: Result[A]) extends AnyVal {
+    def result: Term = r match {
+      case Success
+    }
+  } */
 
   override val whitespace = """(\s|\(\*([^*]|\*[^)])*\*\))+"""r
   
   lazy val interpreter = exp | dec
   
-  lazy val program = (dec*) ^^ { ds => Program(ds) }
+  lazy val program: GLLParser[Program] = (dec*) ^^ { ds => Program(ds) }
   
   lazy val decs = dec*
   
-  lazy val dec = (
+  lazy val dec: GLLParser[Binding] = (
       "val" ~ pat ~ "=" ~ exp ^^ { (_, p, _, e) => Binding(pat = p, exp = e) }
     | "val" ~ id ~ "=" ~ fun ^^ { 
       (_, ident, _, f) => Binding(pat = IdPattern(ident), exp = f) 
@@ -29,7 +35,7 @@ object Parser extends RegexParsers {
     
   lazy val exp: GLLParser[Exp] = (
       id
-    | "if" ~ exp ~ "then" ~ exp ~ "else" ~ exp ^^ null
+    //| "if" ~ exp ~ "then" ~ exp ~ "else" ~ exp ^^ null
     | num
     | op 
     | fun
@@ -40,11 +46,16 @@ object Parser extends RegexParsers {
     | "let" ~ decs ~ "in" ~ exp ~ "end" ^^ null
     | "(" ~ ")" ^^ { (_, _) => UnitL }
     | "(" ~ exp ~ ")" ^^ { (_, e, _) => ApplyStream(Vector(e)) }
-    | "(" ~ commaExps ~ ")" ^^ null
+    | "(" ~> commaExps <~ ")" ^^ { TTuple(_) }
   )
   
-  lazy val commaExps: GLLParser[Any] = 
-    (exp ~ "," ~ exp) ~ (("," ~ exp)*) ^^ null
+  lazy val commaExps: GLLParser[Seq[Exp]] = 
+    ((exp ~ "," ~ exp)) ~ (extExp*) ^^ { (e1, _, e2, es) => 
+      e1 +: e2 +: es
+    }
+
+  lazy val extExp: GLLParser[Exp] = 
+    "," ~ exp ^^ { (_, e) => e }
   
   lazy val matcher: GLLParser[Seq[Match]] = (
       mrule ^^ { m => Vector(m) }
@@ -70,7 +81,7 @@ object Parser extends RegexParsers {
   
   lazy val num: GLLParser[Number] = (
       int    ^^ { i => IntL(i.toInt)       }
-    | double ^^ { d => DoubleL(d.toDouble) }
+    | float  ^^ { d => DoubleL(d.toDouble) }
   )
   
   lazy val id: GLLParser[Id] = 
@@ -80,11 +91,23 @@ object Parser extends RegexParsers {
   lazy val op: GLLParser[Op] = 
     operator ^^ { s => Op(Symbol(s)) }
   
-  val identifier = """[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*"""r
+  val identifier: GLLParser[String] = """[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*"""r
   
-  val int = """0|-?[1-9]\d*"""r
+  val int: GLLParser[String] = """0|-?[1-9]\d*"""r
   
-  val double = """-?\d*.\d+"""r
+  val float: GLLParser[String] = 
+    ("""(\d+\.\d+((E|e)(\+|\-)?\d+)?(F|f|D|d)?)|""" +
+     """(\.\d+((E|e)(\+|\-)?\d+)?(F|f|D|d)?)|""" +
+     """(\d+((E|e)(\+|\-)?\d+)?(F|f|D|d))|""" + 
+     """(\d+((E|e)(\+|\-)?\d+)(F|f|D|d)?)""").r
+
   
-  val operator = """[=\+\*\-\?\\\$<>]+"""r
+  val operator: GLLParser[String] = """[=\+\*\-\?\\\$<>]+"""r
+  
+  def mkErrorMsg(failed: Failure) = {
+    val Failure(data, tail) = failed
+    val expected = data match {
+      case ExpectedRegex(regex) => s"Expected the_regex on "
+    }
+  }
 }
