@@ -7,25 +7,23 @@ import tweak.compiler.ast._
 trait LiteralParser extends TweakParser { //this: TweakParser => 
 
   lazy val literal: GLLParser[Literal] = (
-    //  id
-    //| op
-    | string
+      string
     | num
   )
 
   val string: GLLParser[StringL]
   val num: GLLParser[Number]
-  val tuple: GLLParser[TTuple]
-  val list: GLLParser[TTuple]
+  //val tuple: GLLParser[TTuple]
+  //val list: GLLParser[TTuple]
 }
 
 trait DefaultLiteralParser extends LiteralParser {
   //this: TweakParser with LiteralParser =>
 
- lazy val string: GLLParser[String] =
-    """"([^"]*)""""r
+  override lazy val string: GLLParser[StringL] =
+    """"(\\.|[^"])*"""".r ^^ { s => StringL(s) }
     
- lazy val num: GLLParser[Number] = (
+  override lazy val num: GLLParser[Number] = (
       int    ^^ { i => IntL(i.toInt)       }
     | float  ^^ { d => DoubleL(d.toDouble) }
   )
