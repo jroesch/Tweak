@@ -8,6 +8,11 @@ import scala.collection.mutable
 
 object ParserSpec extends Specification {
 
+ // implicit class ResultW[R <: Term](val r: Stream[Result[R]]) extends AnyVal {
+ //   def result: Term = r match {
+ //     case Stream(h, _) => h match {
+ //     case _ => new Exception("
+
   "The int parser" should {
     "correctly parse integers" in {
       val ints = List("0", "1", "20", "34000", "45676940")
@@ -51,6 +56,13 @@ object ParserSpec extends Specification {
     }
   }
   
+  "The string parser" should {
+    "parse a simple string" in {
+      val str = """"Hello World!"""
+      P.string(str) === StringL("Hello World")
+    }
+  }
+
   "The exp parser should" should {
     "parse () as UnitL" in {
       P.exp("()") === terms.UnitL
