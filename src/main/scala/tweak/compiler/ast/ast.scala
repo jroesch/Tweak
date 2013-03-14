@@ -11,9 +11,8 @@ package object ast {
   
   /* Expressions */
   sealed trait Exp extends Term
-  case class Op(op: Symbol) extends Exp
-  case class CaseExp(scrutinee: Any, matches: Any) extends Exp
-  case class AssignExp(name: Any, value: Any) extends Exp
+  case class CaseExp(scrutinee: Any, matches: Any) extends Exp 
+  //case class AssignExp(name: Any, value: Any) extends Exp
   
   /* Functions */
   case class TFunction(ms: Seq[Match]) extends Exp
@@ -82,9 +81,13 @@ package object ast {
   case object WildCardPattern extends Pattern
   case class ConsPattern(head: Pattern, tail: Pattern) extends Pattern
   
-  /* Identifier */
-  case class Symbol(s: String) extends Term
-  case class Id(s: Symbol) extends Exp
+  /* Symbols */
+  class Symbol(s: String) extends Exp {
+    /* def unapply(...) = ???
+     */
+  }
+  case class Id(s: String) extends Symbol(s)
+  case class Op(s: String) extends Symbol(s)
   
   case class Infix(s: Symbol, prec: Int)
   
@@ -100,7 +103,7 @@ package object ast {
 
   sealed trait TList extends Value
   case class TCons(head: Exp, tail: Exp) extends Value
-  case class TListL extends Value with Literal
+  //case class TListL extends Value with Literal
   case object TNil extends Value with Literal
 
   /* Tuple Wraper */
