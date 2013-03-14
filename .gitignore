@@ -42,3 +42,4 @@ project/boot/
 src/.DS_Store
 *~
 *.swp
+.*swo
