@@ -4,35 +4,7 @@ import language.implicitConversions
 
 package object ast {
   
-  trait PrettyPrintable {
-    def pprint: String = this.toString
-  }
-  
-  object PrettyPrinter {
-    import com.codecommit.gll._
-    def prettyPrint[A <: PrettyPrintable](s: Stream[Result[A]]) = s match {
-      case Stream(s) => s match { 
-        case Success(v, rest) => v.pprint
-        case _                => throw new Exception("parse failed at:")
-      }
-      case _ => throw new Exception("match error")
-    }
-  }
-  
-  sealed trait Term extends PrettyPrintable { this: Term => 
-    override def pprint: String = {
-      
-      var ilevel = 0
-      
-      def ipprint(t: Term, indentLevel: Int = ilevel): String = t match {
-          case Program(es) => es.foldLeft("") { (a, s) => a + ipprint(s) + "\n" } 
-            // case
-          case _ => (t, indentLevel).toString
-      }
-
-      ipprint(this)
-    }
-  }
+  sealed trait Term 
   
   /* Program */
   case class Program(es: Seq[Binding]) extends Term
@@ -90,12 +62,6 @@ package object ast {
   }
   
   case class Apply(a: Exp, b: Exp) extends Exp {
-    override def pprint = a match {
-      case Apply(Apply(op: Op, e1), e2) => 
-        e1.pprint + " " + op.pprint + " " + e2.pprint
-      case Apply(f, g) => f.pprint + " " + g.pprint
-    }
-    
     // Shift reduce parser for operators?
     /* case (level, Apply(Apply(op, e1) e2)) => self(level, e2)
     case (level, e) => */
@@ -143,7 +109,7 @@ package object ast {
 
     if (size > 23) throw new Exception("Too big mannnn!")
   }
-
+  /* fix literal inheritance BS */
   sealed trait Literal extends Exp
 
   sealed trait Number extends Literal
@@ -156,7 +122,7 @@ package object ast {
     override def toString = d.toString
   }
   
-  case class StringL(s: String) extends Number {
+  case class StringL(s: String) extends Literal {
     override def toString = s.toString
   }
   
