@@ -38,25 +38,25 @@ object PrettyPrinterP {
 
       case n: Number => n.toString
       
-      case TFunction(ms) => indent {
+      /* case TFunction(ms) => indent {
         ms.foldLeft(_code) { (c, m) =>
           c + codeStep(m)
         }
-      }
+      } */
       
-      case Match(pat, e) => codeStep(pat) + " => " + codeStep(exp)
+      case Match(pat, e) => codeStep(pat) + " => " + codeStep(e)
       case TTuple(es) => "(" + es.map(codeStep(_)).mkString(", ") + ")"
 
       case UnitL => "()"
 
       case other => other.toString
     }
-    def indent(f: () => String) {
-      indentL += 1
-      val code = f().lines.map { s => ("\t" * indentL) + s }
-      indentL -= 1
-      res
-    }
+    //def indent(f: () => String) {
+    //  indentL += 1
+    //  val code = f().lines.map { s => ("\t" * indentL) + s }
+    //  indentL -= 1
+    //  res
+    //}
 
     def newline(s: String) = s + "\n"
 
