@@ -2,6 +2,7 @@ package tweak.compiler
 
 import language.implicitConversions
 
+/* I hate this file, but everything must be in the same file in order to be sealed */
 package object ast {
   
   sealed trait Term 
@@ -11,67 +12,39 @@ package object ast {
   
   /* Expressions */
   sealed trait Exp extends Term
-  case class CaseExp(scrutinee: Any, matches: Any) extends Exp 
+  
+  /* OpParser Scaffolding */
+  sealed trait InfixExp extends Exp
+  case class Only(e: Exp) extends InfixExp
+  case class Neg(e: InfixExp) extends InfixExp
+  case class Infix(i: InfixExp, o: Op, e: Exp) extends InfixExp
+
+  case class Negate(e: Exp) extends Exp
+  case class Apply(e: Exp, f: Exp) extends Exp
+  case class OpApply(o: Op, e: Exp, f: Exp) extends Exp {
+    def asSource: String = {
+      def step(e: Exp): String = e match {
+        case OpApply(o, e1, e2) => "(" + step(e1) + " " + o.name + " " + step(e2) + ")"
+        case e => e.toString
+      }
+
+      step(this)
+    }
+  }
+
+  case class OpError(msg: String) extends Exp
+  
+  case class MatchExp(scrutinee: Exp, matches: Seq[Match]) extends Exp 
   //case class AssignExp(name: Any, value: Any) extends Exp
   
   /* Functions */
   case class TFunction(ms: Seq[Match]) extends Exp
   
-  object ApplyStream {
-    implicit def vectorToApplyStream(vec: Vector[Exp]) = ApplyStream(vec)
-    implicit def ApplyStreamToVector(opstr: ApplyStream): Vector[Exp] = opstr.ops
-    
-    def genStream(f: Exp, g: Exp): ApplyStream = 
-      (f, g) match {
-        case (ApplyStream(fst), ApplyStream(snd)) => fst ++ snd
-        case (ApplyStream(fst), snd)              => fst :+ snd
-        case (fst, ApplyStream(snd))              => fst +: snd
-        case (_, _)                               => Vector(f, g)
-      }
-  }
-  
-  case class ApplyStream(ops: Vector[Exp]) extends Exp {
-    override def toString = "ApplyStream(" + ops.mkString(", ") + ")"
-
-     /* def fix(pt: frontend.internal.PrecedenceTable) = this match {
-      (pt.minLevel to pt.maxLevel) map { l => 
-        val atLevel = pt atLevel l
-        
-        type StreamState = (Exp, Exp, Vector[Exp])
-
-        var ttree = Vector[Exp]()
-
-        var i = 0;
-        while (i < ops.length) {
-          (ops(i), ops(i + 1), ops(i + 2)) match {
-            case (e1, o: Op, e2) if pt(o.op) == l => {
-              i += 3
-              tree = Apply(Apply(o, e1), e2) +: tree
-            }
-
-            case e => {
-              i += 1
-              tree = e +: tree
-            }
-          }
-        }
-
-      } */
-
-  }
-  
-  case class Apply(a: Exp, b: Exp) extends Exp {
-    // Shift reduce parser for operators?
-    /* case (level, Apply(Apply(op, e1) e2)) => self(level, e2)
-    case (level, e) => */
-    
-    def applyTo(e: Exp): Apply = Apply(this, e)
-  }
-  
+  // XX: enable sections
+  case class Section(o: Op) extends Exp
   
   /* Match */
   case class Match(pat: Pattern, exp: Exp) extends Term
-  case class MatchSeq(ps: Seq[Pattern]) extends Term
   
   /* Pattern */
   sealed trait Pattern extends Term
@@ -82,14 +55,11 @@ package object ast {
   case class ConsPattern(head: Pattern, tail: Pattern) extends Pattern
   
   /* Symbols */
-  class Symbol(s: String) extends Exp {
+  class Symbol(val name: String) extends Exp {
     /* def unapply(...) = ???
-     */
-  }
-  case class Id(s: String) extends Symbol(s)
-  case class Op(s: String) extends Symbol(s)
-  
-  case class Infix(s: Symbol, prec: Int)
+     */ }
+  case class Id(str: String) extends Symbol(str)
+  case class Op(str: String) extends Symbol(str)
   
   /* Variable */
   case class Binding(pat: Pattern, typ: Type = AnyType, exp: Exp) extends Term
