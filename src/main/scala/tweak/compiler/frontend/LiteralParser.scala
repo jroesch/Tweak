@@ -28,11 +28,11 @@ trait DefaultLiteralParser extends LiteralParser {
     | float  ^^ { d => DoubleL(d.toDouble) }
   )
 
-  val int: GLLParser[String] = """0|-?[1-9]\d*"""r
+  val int: GLLParser[String] = """0|[1-9]\d*"""r
   
   val float: GLLParser[String] = 
     ("""(\d+\.\d+((E|e)(\+|\-)?\d+)?(F|f|D|d)?)|""" +
-     """(\.\d+((E|e)(\+|\-)?\d+)?(F|f|D|d)?)|""" +
+     //"""(\.\d+((E|e)(\+|\-)?\d+)?(F|f|D|d)?)|""" +
      """(\d+((E|e)(\+|\-)?\d+)?(F|f|D|d))|""" + 
      """(\d+((E|e)(\+|\-)?\d+)(F|f|D|d)?)""").r
 }
