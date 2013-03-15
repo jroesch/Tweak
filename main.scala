@@ -22,7 +22,8 @@ object Main {
       var line = reader.readLine()
       while (line != null) {
         val results = TweakParser.interpreter(line)
-        results map { case Success(value, _) => println(value); case _ => Unit }
+        results map { case Success(value, _) => println(pcode(value))
+        ; case _ => Unit }
         line = reader.readLine()
       }
     }
