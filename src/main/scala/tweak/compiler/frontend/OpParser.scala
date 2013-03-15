@@ -3,13 +3,20 @@ package tweak.compiler.frontend
 import language.postfixOps
 import com.codecommit.gll._
 import tweak.compiler.ast._
-import tweak.compiler.frontend.internal._
+import scala.collection.mutable.{ HashMap => Map }
 import language.implicitConversions
 
 trait OpParser {
   type Precedence = Int
+
   /* XXX: Not thread safe in the slightest, icky mutable state */
-  val precTable = new PrecedenceTable
+  val precTable = Map[String, (Precedence, Assoc)]()
+  
+  sealed trait Assoc
+  case object L extends Assoc
+  case object R extends Assoc
+  case object N extends Assoc
+
   /* for current testing purposes */
  /* fix implicits issues */
   precTable("+") = 6 -> L 
