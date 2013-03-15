@@ -1,6 +1,7 @@
 package tweak.compiler.ast
 
 object PrettyPrinterP {
+  import tweak.compiler.frontend.Parser.precTable
   /* print this */
   /* trait Printer[A] {
     def code(t: Term): String 
@@ -34,33 +35,54 @@ object PrettyPrinterP {
         newline("val " + codeStep(pat) + " = " + codeStep(e))
       }
 
-      case p: Pattern => "<pattern>"
+      case p: Pattern => p match {
+        case LiteralPattern(l) => codeStep(l)
+        case PatternSeq(ps) => "<pattern_seq>"
+        case IdPattern(ident) => codeStep(ident)
+        case WildCardPattern => "_"
+        case ConsPattern(h, tail) => codeStep(h) + " :: " + codeStep(tail)
+        case _ => "<pattern>"
+      }
 
       case n: Number => n.toString
+
+      case sym: Symbol => sym.name
       
-      /* case TFunction(ms) => indent {
-        ms.foldLeft(_code) { (c, m) =>
-          c + codeStep(m)
+      case TFunction(ms) => "" + indent {
+          ms.foldLeft("") { (a, e) => a + codeStep(e) }
+      }
+
+      case MatchExp(e, ms) => newline("match " + codeStep(e) + " with") +
+        indent { 
+          // XXX: Fix this so they are printed out properly"
+          ms.foldLeft("") { (a, e) => a + codeStep(e) }
         }
-      } */
+        
+      case Match(pat, e) => newline(codeStep(pat) + " => " + codeStep(e))
       
-      case Match(pat, e) => codeStep(pat) + " => " + codeStep(e)
       case TTuple(es) => "(" + es.map(codeStep(_)).mkString(", ") + ")"
 
       case UnitL => "()"
 
       case other => other.toString
     }
-    //def indent(f: () => String) {
-    //  indentL += 1
-    //  val code = f().lines.map { s => ("\t" * indentL) + s }
-    //  indentL -= 1
-    //  res
-    //}
+
+    def indent(f: => String): String = {
+      indentL += 1
+
+      val code = f.lines.map { s => 
+        val c = "  " * indentL + s
+        //println("|  " + c)
+        c 
+      }
+
+      indentL -= 1
+      code.mkString("\n")
+    }
 
     def newline(s: String) = s + "\n"
 
-    codeStep(t)
+    "=> " + codeStep(t)
   }
   
 }
