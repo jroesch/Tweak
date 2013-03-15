@@ -15,16 +15,24 @@ trait DefaultExpParser extends ExpParser {
   this: FunctionParser with MatchParser with SymbolParser with LiteralParser => 
 
   lazy val exp: GLLParser[Exp] = (
-      symbol
-    | num
-    | function
-    | exp ~ exp ^^ { (f, g) => ApplyStream.genStream(f, g) }
-    | "match" ~ exp ~ "with" ~ matcher ^^ { (_, sc, _, ms) => CaseExp(sc, ms) }
-    //| "let" ~ decs ~ "in" ~ exp ~ "end" ^^ null
+      function
+    | exp ~ exp ^^ null
+    | exp ~ op ~ exp ^^ { (e1, op, e2) => 
+        e1 match {
+          case ie: InfixExp => Infix(ie, op, e2)
+          case _            => Infix(Only(e1), op, e2) 
+        }
+      }
+    | "match" ~ exp ~ "with" ~ matcher ^^ { (_, sc, _, ms) => MatchExp(sc, ms) }
     | "(" ~ ")" ^^ { (_, _) => UnitL }
-    | "(" ~ exp ~ ")" ^^ { (_, e, _) => ApplyStream(Vector(e)) }
+    | section
+    | "(" ~ exp ~ ")" ^^ null
     | "(" ~> commaExps <~ ")" ^^ { TTuple(_) }
+    | id
+    | num
   ) 
+
+  lazy val section: GLLParser[Section] =  "(" ~> op <~ ")" ^^ { o => Section(o) }
 
   lazy val commaExps: GLLParser[Seq[Exp]] = 
     ((exp ~ "," ~ exp)) ~ (extExp*) ^^ { (e1, _, e2, es) => 
