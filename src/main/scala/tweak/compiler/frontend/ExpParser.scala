@@ -16,13 +16,13 @@ trait DefaultExpParser extends ExpParser {
 
   lazy val exp: GLLParser[Exp] = (
       function
-    | exp ~ exp ^^ null
     | exp ~ op ~ exp ^^ { (e1, op, e2) => 
         e1 match {
           case ie: InfixExp => Infix(ie, op, e2)
           case _            => Infix(Only(e1), op, e2) 
         }
       }
+    | exp ~ exp ^^ { (e1, e2) => Apply(e1, e2) }
     | "match" ~ exp ~ "with" ~ matcher ^^ { (_, sc, _, ms) => MatchExp(sc, ms) }
     | "(" ~ ")" ^^ { (_, _) => UnitL }
     | section

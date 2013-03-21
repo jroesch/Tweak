@@ -49,7 +49,7 @@ package object ast {
   /* Pattern */
   sealed trait Pattern extends Term
   case class LiteralPattern(l: Literal) extends Pattern
-  case class PatternSeq(pat: Seq[Term]) extends Pattern
+  case class PatternSeq(pat: Seq[Pattern]) extends Pattern
   case class IdPattern(id: Id) extends Pattern
   case object WildCardPattern extends Pattern
   case class ConsPattern(head: Pattern, tail: Pattern) extends Pattern
