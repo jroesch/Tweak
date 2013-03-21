@@ -41,7 +41,7 @@ object ParserSpec extends Specification {
 
   "The float parser" should {
     "correctly parse floats" in {
-      val floats = List("0.1", "0.0", ".1", 
+      val floats = List("0.1", "0.0", 
                          "2.100", "2e10", "9E50",
                          "1.0e5", "2.05E5", "100e4")
       floats map { d => 
