@@ -9,8 +9,7 @@ object Parser extends DefaultExpParser
     with DefaultFunctionParser
     with DefaultMatchParser
     with DefaultSymbolParser
-    with DefaultLiteralParser 
-    with OpParser {
+    with DefaultLiteralParser { 
   /* implicit class UnwrapResult[A <: Term](val r: Result[A]) extends AnyVal {
     def result: Term = r match {
       case Success

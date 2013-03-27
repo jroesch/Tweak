@@ -6,7 +6,11 @@ import tweak.compiler.ast._
 import scala.collection.mutable.{ HashMap => Map }
 import language.implicitConversions
 
-trait OpParser {
+trait OpPrecedence {
+  val phaseName = "Operator Precedence"
+
+  def transform(t: Tree): Tree = ???
+
   type Precedence = Int
 
   /* XXX: Not thread safe in the slightest, icky mutable state */
