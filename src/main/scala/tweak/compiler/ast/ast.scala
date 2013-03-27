@@ -5,13 +5,13 @@ import language.implicitConversions
 /* I hate this file, but everything must be in the same file in order to be sealed */
 package object ast {
   
-  sealed trait Term 
+  sealed trait Tree 
   
   /* Program */
-  case class Program(es: Seq[Binding]) extends Term
+  case class Program(es: Seq[Binding]) extends Tree
   
   /* Expressions */
-  sealed trait Exp extends Term
+  sealed trait Exp extends Tree
   
   /* OpParser Scaffolding */
   sealed trait InfixExp extends Exp
@@ -44,10 +44,10 @@ package object ast {
   case class Section(o: Op) extends Exp
   
   /* Match */
-  case class Match(pat: Pattern, exp: Exp) extends Term
+  case class Match(pat: Pattern, exp: Exp) extends Tree
   
   /* Pattern */
-  sealed trait Pattern extends Term
+  sealed trait Pattern extends Tree
   case class LiteralPattern(l: Literal) extends Pattern
   case class PatternSeq(pat: Seq[Pattern]) extends Pattern
   case class IdPattern(id: Id) extends Pattern
@@ -62,10 +62,10 @@ package object ast {
   case class Op(str: String) extends Symbol(str)
   
   /* Variable */
-  case class Binding(pat: Pattern, typ: Type = AnyType, exp: Exp) extends Term
+  case class Binding(pat: Pattern, typ: Type = AnyType, exp: Exp) extends Tree
   
   /* Type */
-  sealed trait Type extends Term
+  sealed trait Type extends Tree
   case object AnyType extends Type
   
   /* Literals */

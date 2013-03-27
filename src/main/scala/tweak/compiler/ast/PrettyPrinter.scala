@@ -4,7 +4,7 @@ object PrettyPrinterP {
   import tweak.compiler.frontend.Parser.precTable
   /* print this */
   /* trait Printer[A] {
-    def code(t: Term): String 
+    def code(t: Tree): String 
   }
   
   implicit object ProgramPrinter extends Printer[Program] {
@@ -20,13 +20,13 @@ object PrettyPrinterP {
   } */
   
   /* research better pretty printers */
-  def code(t: Term): String = {
+  def code(t: Tree): String = {
     import tweak.compiler.ast._
 
     var _code = ""
     var indentL = 0
 
-    def codeStep(t: Term): String = t match {
+    def codeStep(t: Tree): String = t match {
       case Program(bs) => bs.foldLeft(_code) { (c: String, b: Binding) =>
         c + codeStep(b)
       }
